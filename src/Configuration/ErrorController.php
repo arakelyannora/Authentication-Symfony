@@ -3,6 +3,8 @@
 namespace App\Configuration;
 
 use App\Exceptions\UserAlreadyExistsException;
+use App\Exceptions\UserException;
+use App\Exceptions\UserNotFoundException;
 use App\Exceptions\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,9 +16,13 @@ class ErrorController
 			"code" => "VALIDATION_FAILED",
 			"message" => "Validation failed"
 		],
-		UserAlreadyExistsException::class => [
-			"code" => "USER_EXISTS",
-			"message" => "User already exists"
+		UserException::class => [
+			"code" => "USER_INVALID_DATA",
+			"message" => "User invalid data"
+		],
+		UserNotFoundException::class => [
+			"code" => "NOT_FOUND",
+			"message" => "User not found"
 		],
 		\Exception::class => [
 			"code" => "SYSTEM_ERROR",
@@ -47,7 +53,7 @@ class ErrorController
 
 		if ($exception instanceof ValidationException) {
 			$body["errors"] = $exception->getErrors();
-		} else if ($exception instanceof UserAlreadyExistsException){
+		} else if ($exception instanceof UserException){
 			$body["errors"] = $exception->getMessage();
 		} else {
 			$code = Response::HTTP_INTERNAL_SERVER_ERROR;
@@ -55,9 +61,13 @@ class ErrorController
 			$body["message"] = self::ERROR_MAP[\Exception::class]["message"];
 		}
 
-		return new JsonResponse(
+		$response = new JsonResponse(
 			$body,
 			$code
 		);
+
+		$response->headers->set('Content-Type', 'application/json; charset=UTF-8');
+
+		return $response;
 	}
 }
