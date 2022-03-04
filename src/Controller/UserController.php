@@ -3,39 +3,43 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Exceptions\UserAlreadyExistsException;
+use App\Requests\RegisterUserRequest;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Entity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
+    public function __construct(private EntityManagerInterface $entityManager)
+    {}
 
     /**
      * @Route(
-     *     "/users"
+     *     "/users/{id}"
      * ),
      * methods = {"POST"}
      */
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
-        $request1 = json_decode($request->getContent(), true);
-        $email = $request1['email'];
-        $password = $request1['password'];
+        $user = new User($request->email, $request->password);
 
-        $user = new User($email, $password);
+        $repository = $this->entityManager->getRepository(User::class);
 
+        $user = $repository->findOneBy(
+        	[
+        		"email" => $request->email
+	        ]
+        );
+
+        if (!is_null($user)) {
+        	throw UserAlreadyExistsException::fromEmail($request->email);
+        }
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return new Response($this->json("created"), Response::HTTP_CREATED);
+        return new JsonResponse("created", Response::HTTP_CREATED);
     }
 }
