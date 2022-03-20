@@ -6,6 +6,9 @@ kernel:
     resource: ../src/Kernel.php
     type: annotation
 
+api_login_check:
+    path: /login_check
+
 #index:
 #    path: /
 #    controller: App\Controller\ArticleController::index

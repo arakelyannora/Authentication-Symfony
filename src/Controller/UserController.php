@@ -8,9 +8,9 @@ use App\Exceptions\UserNotFoundException;
 use App\Requests\RegisterUserRequest;
 use App\Responses\UserResponseMapper;
 use Doctrine\ORM\EntityManagerInterface;
-use JetBrains\PhpStorm\Pure;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -19,7 +19,8 @@ class UserController extends ApplicationController
     public function __construct(
     	private EntityManagerInterface $entityManager,
 	    private SerializerInterface $serializer,
-	    private UserResponseMapper $responseMapper
+	    private UserResponseMapper $responseMapper,
+        private UserPasswordHasherInterface $passwordHasher
     ) {
     	parent::__construct($this->serializer);
     }
@@ -44,6 +45,8 @@ class UserController extends ApplicationController
 		    throw UserAlreadyExistsException::fromEmail($request->email);
 	    }
 	    $user = new User($request->email, $request->password);
+        $hashedPass = $this->passwordHasher->hashPassword($user, $request->password);
+        $user->setPassword($hashedPass);
 	    $this->entityManager->persist($user);
         $this->entityManager->flush();
 
@@ -52,7 +55,7 @@ class UserController extends ApplicationController
 
 	/**
 	 * @Route(
-	 *     "/users/{id}"
+	 *     "/users/me/{id}"
 	 * ),
 	 * methods={"GET"}
 	 */
