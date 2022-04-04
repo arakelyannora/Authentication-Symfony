@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Exceptions\UserAlreadyExistsException;
 use App\Exceptions\UserNotFoundException;
+use App\Repository\UserRepository;
 use App\Requests\RegisterUserRequest;
 use App\Responses\UserResponseMapper;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,7 +21,8 @@ class UserController extends ApplicationController
     	private EntityManagerInterface $entityManager,
 	    private SerializerInterface $serializer,
 	    private UserResponseMapper $responseMapper,
-        private UserPasswordHasherInterface $passwordHasher
+        private UserPasswordHasherInterface $passwordHasher,
+	    private UserRepository $userRepository
     ) {
     	parent::__construct($this->serializer);
     }
@@ -59,19 +61,9 @@ class UserController extends ApplicationController
 	 * ),
 	 * methods={"GET"}
 	 */
-    public function getUserById(string $id)
+    public function getUserById(int $id): Response
     {
-    	$repository = $this->entityManager->getRepository(User::class);
-    	$user = $repository->findOneBy(
-    		[
-    			"id" => $id
-		    ]
-	    );
-
-    	if (!$user instanceof User) {
-			throw UserNotFoundException::withId($id);
-	    }
-
+    	$user = $this->userRepository->getUserById($id);
     	$userResponse = $this->responseMapper->mapFromDomain($user);
 
     	return $this->jsonOkResponse($userResponse);
