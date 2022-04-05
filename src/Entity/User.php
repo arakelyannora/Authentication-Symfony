@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Common\UuidInterface;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -11,9 +12,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private int $id;
+    #[ORM\Column(type: 'guid')]
+    private string $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $email;
@@ -24,16 +24,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     private string $password;
 
-    public function __construct(string $email, string $password)
+    public function __construct(UuidInterface $uuid, string $email)
     {
+    	$this->id = $uuid->toString();
         $this->email = $email;
-        $this->password = $password;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+	/**
+	 * @return string
+	 */
+	public function getId(): string
+	{
+		return $this->id;
+	}
 
     public function getEmail(): ?string
     {

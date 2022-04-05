@@ -2,16 +2,15 @@
 
 namespace App\Controller;
 
+use App\Factory\UserFactory;
 use App\Entity\User;
 use App\Exceptions\UserAlreadyExistsException;
-use App\Exceptions\UserNotFoundException;
 use App\Repository\UserRepository;
 use App\Requests\RegisterUserRequest;
 use App\Responses\UserResponseMapper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -21,8 +20,8 @@ class UserController extends ApplicationController
     	private EntityManagerInterface $entityManager,
 	    private SerializerInterface $serializer,
 	    private UserResponseMapper $responseMapper,
-        private UserPasswordHasherInterface $passwordHasher,
-	    private UserRepository $userRepository
+	    private UserRepository $userRepository,
+	    private UserFactory $userFactory
     ) {
     	parent::__construct($this->serializer);
     }
@@ -46,9 +45,8 @@ class UserController extends ApplicationController
 	    if (!is_null($user)) {
 		    throw UserAlreadyExistsException::fromEmail($request->email);
 	    }
-	    $user = new User($request->email, $request->password);
-        $hashedPass = $this->passwordHasher->hashPassword($user, $request->password);
-        $user->setPassword($hashedPass);
+
+	    $user = $this->userFactory->create($request->email, $request->password);
 	    $this->entityManager->persist($user);
         $this->entityManager->flush();
 
