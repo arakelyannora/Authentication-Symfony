@@ -2,68 +2,27 @@
 
 namespace App\Controller;
 
-use App\Factory\UserFactory;
-use App\Entity\User;
-use App\Exceptions\UserAlreadyExistsException;
-use App\Repository\UserRepository;
-use App\Requests\RegisterUserRequest;
 use App\Responses\UserResponseMapper;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class UserController extends ApplicationController
 {
     public function __construct(
-    	private EntityManagerInterface $entityManager,
 	    private SerializerInterface $serializer,
-	    private UserResponseMapper $responseMapper,
-	    private UserRepository $userRepository,
-	    private UserFactory $userFactory
+	    private UserResponseMapper $responseMapper
     ) {
     	parent::__construct($this->serializer);
     }
 
     /**
-     * @Route(
-     *     "/users"
-     * ),
-     * methods = {"POST"}
+     * @Route (
+     *     "/users/me",
+     *     methods={"GET"}
+     * )
      */
-    public function register(RegisterUserRequest $request)
+    public function getMe(): Response
     {
-	    $repository = $this->entityManager->getRepository(User::class);
-
-	    $user = $repository->findOneBy(
-        	[
-        		"email" => $request->email
-	        ]
-        );
-
-	    if (!is_null($user)) {
-		    throw UserAlreadyExistsException::fromEmail($request->email);
-	    }
-
-	    $user = $this->userFactory->create($request->email, $request->password);
-	    $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return new JsonResponse("created", Response::HTTP_CREATED);
-    }
-
-	/**
-	 * @Route(
-	 *     "/users/me/{id}"
-	 * ),
-	 * methods={"GET"}
-	 */
-    public function getUserById(int $id): Response
-    {
-    	$user = $this->userRepository->getUserById($id);
-    	$userResponse = $this->responseMapper->mapFromDomain($user);
-
-    	return $this->jsonOkResponse($userResponse);
+        return $this->jsonOkResponse($this->responseMapper->mapFromDomain($this->getAuthenticatedUser()));
     }
 }

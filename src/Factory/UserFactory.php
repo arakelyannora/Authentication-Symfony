@@ -14,11 +14,12 @@ class UserFactory
 	) {
 	}
 
-    public function create(string $email, string $password): User
+    public function create(string $email, string $password, string $fullName): User
     {
 		$user = new User(
 			$this->uuidGenerator->getUuid(),
-			$email
+			$email,
+            $fullName
 		);
 
 		$hashedPassword = $this->passwordHasher->hashPassword($user, $password);

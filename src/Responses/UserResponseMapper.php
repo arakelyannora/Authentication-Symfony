@@ -8,6 +8,6 @@ class UserResponseMapper
 {
 	public function mapFromDomain(User $user): UserResponse
 	{
-		return new UserResponse($user->getEmail());
+		return new UserResponse($user->getEmail(), $user->getFullName());
 	}
 }

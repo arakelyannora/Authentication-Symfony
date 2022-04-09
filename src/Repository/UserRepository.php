@@ -14,7 +14,7 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function getUserById(int $id): User
+    public function getUserById(string $id): User
     {
 		$user = $this->findOneBy(
 			[
@@ -27,5 +27,14 @@ class UserRepository extends ServiceEntityRepository
 		}
 
 		return $user;
+    }
+
+    public function getUserByEmail(string $email): ?User
+    {
+        return $this->findOneBy(
+            [
+                "email" => $email
+            ]
+        );
     }
 }

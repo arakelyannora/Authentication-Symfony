@@ -6,9 +6,12 @@ class UserResponse extends ResponseEntity
 {
 	private string $email;
 
-	public function __construct(string $email)
+    private string $fullname;
+
+	public function __construct(string $email, string $fullname)
 	{
 		$this->email = $email;
+        $this->fullname = $fullname;
 	}
 
 	/**
@@ -18,4 +21,12 @@ class UserResponse extends ResponseEntity
 	{
 		return $this->email;
 	}
+
+    /**
+     * @return string
+     */
+    public function getFullname(): string
+    {
+        return $this->fullname;
+    }
 }
