@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Responses\UserResponseMapper;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends ApplicationController
 {
