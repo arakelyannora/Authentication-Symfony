@@ -4,6 +4,7 @@ namespace App\Factory;
 
 use App\Common\UuidGeneratorInterface;
 use App\Entity\User;
+use App\ServiceCommands\UserRegisterCommand;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFactory
@@ -14,15 +15,15 @@ class UserFactory
 	) {
 	}
 
-    public function create(string $email, string $password, string $fullName): User
+    public function create(UserRegisterCommand $command): User
     {
 		$user = new User(
 			$this->uuidGenerator->getUuid(),
-			$email,
-            $fullName
+			$command->getEmail(),
+            $command->getFullName()
 		);
 
-		$hashedPassword = $this->passwordHasher->hashPassword($user, $password);
+		$hashedPassword = $this->passwordHasher->hashPassword($user, $command->getPassword());
 		$user->setPassword($hashedPassword);
 
 		return $user;

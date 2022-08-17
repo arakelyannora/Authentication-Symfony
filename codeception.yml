@@ -1,0 +1,18 @@
+suites:
+    unit:
+        path: .
+settings:
+    shuffle: true
+    lint: true
+coverage:
+    enabled: true
+    include:
+        - app/src
+    exclude:
+        - app/src/Common
+        - app/src/Configuration
+paths:
+    tests: tests
+    output: tests/_output
+    support: tests/_support
+    data: tests
