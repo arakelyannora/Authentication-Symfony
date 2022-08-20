@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Exceptions\UserNotFoundException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 
 class UserRepository extends ServiceEntityRepository
 {
@@ -36,5 +37,10 @@ class UserRepository extends ServiceEntityRepository
                 "email" => $email
             ]
         );
+    }
+
+    public function getUsers(): QueryAdapter
+    {
+        return new QueryAdapter($this->createQueryBuilder('u'));
     }
 }
